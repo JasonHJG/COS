@@ -37,13 +37,13 @@ class Ornstein_Uhlenbeck:
         self.x_array = list(self.x_array)
         self.price_array = list(self.price_array)
 
-    def get_price(self, n_days):
+    def get_price(self, n_steps):
         """
         get the process as an array
-        :param n_days: int, number of days before
-        :return:
+        :param n_steps: int, number of days before
+        :return: list of recent n steps of price data
         """
-        return self.price_array[-n_days:]
+        return self.price_array[-n_steps:]
 
     def move_forward(self):
         """

@@ -1,4 +1,5 @@
 from Simulation import Ornstein_Uhlenbeck
+from Simulation import Dummy_liquidity_process
 
 
 class Stock:
@@ -21,19 +22,15 @@ class Stock:
 
     def move_forward(self):
         """
-        move one day forward
+        move one unit step forward
         """
         self.price_process.move_forward()
         self.liquidity_process.move_forward()
 
-    def get_history(self, n_days):
+    def get_history(self, n_steps):
         """
-        get the history of price_process and liquidity_process for the previous n days
-        :param n_days: int
-        :return: array of price and liquidity
+        get the history of price_process and liquidity_process for the previous n steps
+        :param n_steps: int
+        :return: list of recent n steps of price and liquidity data
         """
-
-
-
-
-
+        return self.price_process.get_price(n_steps), self.liquidity_process.get_process(n_steps)
