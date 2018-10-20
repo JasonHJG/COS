@@ -45,7 +45,7 @@ class Ornstein_Uhlenbeck:
         """
         get the process as an array
         :param n_steps: int, number of days before
-        :return: list of recent n steps of price data
+        :return: list of recent n steps of price data, list of the last n steps index
         """
         recent_price = []
         price_index_array = list(self.price_dict)
@@ -53,7 +53,7 @@ class Ornstein_Uhlenbeck:
         recent_price_index = price_index_array[- n_steps:]
         for i in recent_price_index:
             recent_price.append(self.price_dict[i])
-        return recent_price
+        return recent_price, recent_price_index
 
     def move_forward(self):
         """

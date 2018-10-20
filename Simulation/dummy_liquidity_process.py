@@ -28,6 +28,12 @@ class Dummy_liquidity_process:
         """
         get the liquidity process for the previous n steps
         :param n_steps: int
-        :return: list of recent n steps of liquidity data
+        :return: list of recent n steps of liquidity data, list of recent n steps index
         """
-        return [.5] * n_steps
+        recent_process = []
+        process_index_array = list(self.liquidity_dict)
+        process_index_array.sort()
+        recent_process_index = process_index_array[- n_steps:]
+        for i in recent_process_index:
+            recent_process.append(self.liquidity_dict_dict[i])
+        return recent_process, recent_process_index

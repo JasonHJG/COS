@@ -31,6 +31,11 @@ class Stock:
         """
         get the history of price_process and liquidity_process for the previous n steps
         :param n_steps: int
-        :return: list of recent n steps of price and liquidity data
+        :return: list of n steps index, list of n steps price, list of n steps liquidity
         """
-        return self.price_process.get_price(n_steps), self.liquidity_process.get_process(n_steps)
+        recent_price, index1 = self.price_process.get_price(n_steps)
+        recent_liquidity, index2 = self.liquidity_process.get_process(n_steps)
+        if index1 != index2:
+            print('error in dates')
+            return
+        return index1, recent_price, recent_liquidity
