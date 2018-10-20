@@ -1,6 +1,3 @@
-import Stock
-
-
 class Player:
     """
     define the player, who is able to buy and sell a stock he is holding

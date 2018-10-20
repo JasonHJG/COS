@@ -4,7 +4,7 @@ from Simulation import Dummy_liquidity_process
 
 class Stock:
     """
-    define a stock which has its own price process, liquidity process
+    define a stock which has its own price process, liquidity process (and time stamp for each process)
     it can show its history at any point of time
     it also has its unique trade cost
     """
