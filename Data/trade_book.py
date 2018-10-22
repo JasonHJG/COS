@@ -12,7 +12,7 @@ class Trade_book:
         :param action: int, change in position
         """
         self.book = {}
-        self.book[time_step] = [price, position, cash]
+        self.book[time_step] = [price, position, cash, action]
 
     def net_worth(self):
         """
@@ -22,7 +22,7 @@ class Trade_book:
         time_steps = list(self.book)
         net_worth = {}
         for time in time_steps:
-            price, position, cash = self.book[time]
+            price, position, cash, _ = self.book[time]
             net_worth[time] = price * position + cash
         return net_worth
 
@@ -46,4 +46,4 @@ class Trade_book:
         :param trade_cost: trade cost defined by the stock
         """
         _, last_price, last_postion, last_cash, _ = self.get_recent_information()
-        self.book[time_step] = [price, last_postion+action, last_cash - trade_cost(action), action]
+        self.book[time_step] = [price, last_postion+action, last_cash - trade_cost(action) - action * price, action]

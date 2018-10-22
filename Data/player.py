@@ -1,4 +1,5 @@
 import numpy as np
+from .trade_book import Trade_book
 
 
 class Player:
@@ -8,7 +9,7 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, stock, utility_function, strategy, trade_book, action=[-200, -100, 0, 100, 200]):
+    def __init__(self, stock, utility_function, strategy, action=[-200, -100, 0, 100, 200]):
         """
         initialize an instance of player in the stock market
         :param stock: stock the player is holding
@@ -21,7 +22,8 @@ class Player:
         self.utility_function = utility_function
         self.strategy = strategy
         self.action = action
-        self.trade_book = trade_book
+        time_step, price, _ = self.stock.get_history(1)
+        self.trade_book = Trade_book(time_step[0], price[0], 0, 0, 0)
 
     def observe(self, n_steps=1):
         """

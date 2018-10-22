@@ -35,5 +35,5 @@ class Dummy_liquidity_process:
         process_index_array.sort()
         recent_process_index = process_index_array[- n_steps:]
         for i in recent_process_index:
-            recent_process.append(self.liquidity_dict_dict[i])
+            recent_process.append(self.liquidity_dict[i])
         return recent_process, recent_process_index
