@@ -20,5 +20,5 @@ epsilon_greedy = COS.EpsilonGreedy(action_space=action_space, utility_function=m
 simulator = COS.SimpleSimulator()
 cos = COS.COS(sla, epsilon_greedy, simulator)
 
-cos.train(n_iter=20, batch_size=500000)
+cos.train(n_iter=10, batch_size=500000)
 cos.plot_qval_func()

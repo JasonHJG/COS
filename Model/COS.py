@@ -150,7 +150,7 @@ class COS():
     def plot_qval_func(self):
         colors = ["b","g","r","c","m","y","k"]
         fig, ax = plt.subplots(figsize=(12,6))
-        ps = np.arange(0,100,0.5)
+        ps = np.arange(0,300,1)
         n = len(ps)
         action_space = self.epsilon_greedy.action_space
         for i,act in enumerate(action_space.values):
