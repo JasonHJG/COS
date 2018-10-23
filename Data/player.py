@@ -24,6 +24,19 @@ class Player:
         self.action = action
         time_step, price, _ = self.stock.get_history(1)
         self.trade_book = Trade_book(time_step[0], price[0], 0, 0, 0)
+        self.utility = {}
+
+    def calculate_utility(self):
+        """
+        calculate the utility at time T, which is determined by the change in wealth from T-1 to T
+        :return: float, utility
+        """
+        net_worth = self.trade_book.calculate_net_worth()
+        time_steps = list(net_worth)
+        self.utility[time_steps[0]] = 0  # initialization
+        net_worth_value = list(net_worth.values())
+        for i in range(1, len(time_steps)):
+            self.utility[i] = self.utility_function(net_worth_value[i] - net_worth_value[i - 1])
 
     def observe(self, n_steps=1):
         """
@@ -78,3 +91,4 @@ class Player:
         # todo implement strategy class
         self.strategy.train(index, price_list, liquidity_list, self.position, self.utility_function,
                             length_of_state, self.action)
+

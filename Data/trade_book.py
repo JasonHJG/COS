@@ -14,7 +14,7 @@ class Trade_book:
         self.book = {}
         self.book[time_step] = [price, position, cash, action]
 
-    def net_worth(self):
+    def calculate_net_worth(self):
         """
         calculate the networth
         :return: dictionary of networth
