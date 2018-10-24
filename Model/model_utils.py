@@ -32,6 +32,14 @@ class ActionSpace():
     def get(self, idx):
         return self.values[idx]
         
+    def available_space(self, curr_position, max_position, min_position):
+        avlb_space=[v for v in self.values if (curr_position+v<=max_position and curr_position+v>=min_position)]
+        #print([(curr_position,v)  for v in self.values if (curr_position+v<=max_position and curr_position+v>=min_position)])
+        return avlb_space
+        
+    def uniform_sample_available(self, curr_position, max_position, min_position):
+        return  np.random.choice(self.available_space(curr_position, max_position, min_position))
+        
     def uniform_sample(self,count=None):
         if count is None:
             return np.random.choice(self.values)
@@ -47,7 +55,7 @@ def compute_X(states, actions):
     return X
    
 
-def utility_function(dV, k=0.5):
+def utility_function(dV, k=0.1):
     """
     calculate the utility function according to utility = dV - .5k * dV^2
     :param dV: change in the price of each share

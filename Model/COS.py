@@ -3,8 +3,8 @@ from sklearn.tree import DecisionTreeRegressor
 import model_utils as mu
 import numpy as np
 import matplotlib.pyplot as plt
-import random
-from Simulator import SimpleSimulator
+from collections import deque
+from Simulator import *
 
 class SLA():
     """
@@ -44,7 +44,50 @@ class SLA():
         """
         sl = clone(self.regressor)
         self.supervised_learners.append(sl.fit(X,y))
+
+
+class SLOA():
+    """
+    Supervised Learner Online Averaging
+    """
+
+    def __init__(self, sk_regressor=DecisionTreeRegressor(), n_regressor=25):
+        """
+        initialize an instance of COS learner
+        """
+        self.regressor = sk_regressor
+        self.supervised_learners = deque()
+        self.n_regressor = n_regressor
         
+        
+    def qval(self, state,action):
+        """
+        compute q values for state,action
+        """
+        if not self.supervised_learners :
+            return 0.
+        else:
+            x = mu.compute_x(state, action)
+            return np.mean([sl.predict(x) for sl in self.supervised_learners])
+            
+    def predict(self, X):
+        """
+        predict yhat using X
+        """
+        if not self.supervised_learners :
+            return np.zeros(len(X))
+        else:
+            return np.array([sl.predict(X) for sl in self.supervised_learners]).mean(axis=0)
+        
+    def fit(self, X, y):
+        """
+        fit the next batch of training data with a new supervised_learner
+        """
+        sl = clone(self.regressor)
+        self.supervised_learners.append(sl.fit(X,y))  
+        if len(self.supervised_learners)>self.n_regressor:
+            self.supervised_learners.popleft()
+            
         
         
         
@@ -78,7 +121,7 @@ class EpsilonGreedy():
         self.qval_function = sla.qval
         
         
-    def explore_exploit(self,simulated_state_process):
+    def explore_exploit(self,simulated_state_process, max_position=10000, min_position=0):
         """
         decide whether to explore or exploit
         :param simulated_state_process: np.array
@@ -93,15 +136,27 @@ class EpsilonGreedy():
         for i in range(count-1):
             compute_dv = lambda act: positions[i]*(states[i+1,0]-states[i,0]) - self.trading_cost(share=act, liquidity=states[i,1])
             compute_reward = lambda act: self.utility_function(dV=compute_dv(act)) + self.gamma * self.qval_function(state=states[i],action=act)
+            
+            available_action_space = self.action_space.available_space(curr_position=positions[i],
+                                                                       max_position=max_position,
+                                                                       min_position=min_position)
+            
             if exps[i] == 0:
-                rewards_acts = [compute_reward(act) for act in self.action_space.values]
+                rewards_acts = [compute_reward(act) for act in available_action_space]
+                
                 idx_greedy_policy = rewards_acts.index(max(rewards_acts))
-                actions[i] = self.action_space.get(idx_greedy_policy)
+                actions[i] = available_action_space[idx_greedy_policy]
+                
             else:
-                actions[i] = self.action_space.uniform_sample()
+                actions[i] = self.action_space.uniform_sample_available(curr_position=positions[i],
+                                                                        max_position=max_position,
+                                                                        min_position=min_position)
+                
             # update rewards and position
-            rewards[i] = compute_reward(actions[i])
+            
             positions[i+1] = positions[i] + actions[i]
+            rewards[i] = compute_reward(actions[i])
+        #plt.plot(positions)
                 
         X = mu.compute_X(states=states, actions=actions)
         y = rewards
@@ -150,7 +205,8 @@ class COS():
     def plot_qval_func(self):
         colors = ["b","g","r","c","m","y","k"]
         fig, ax = plt.subplots(figsize=(12,6))
-        ps = np.arange(0,300,1)
+        ps = np.arange(0,150,1)
+        ax.set_xlim(ps[0],ps[-1])
         n = len(ps)
         action_space = self.epsilon_greedy.action_space
         for i,act in enumerate(action_space.values):
@@ -158,4 +214,4 @@ class COS():
             q_hat = self.sla.predict(X)
             ax.scatter(ps,q_hat,label=str(act),c=colors[i%len(colors)],marker='o',linewidths=0)
         ax.legend()
-        plt.show()
+        return fig

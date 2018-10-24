@@ -37,7 +37,7 @@ class SimpleSimulator():
     """
     A simple simulator that simulate constant for liquidity and ou process for price
     """
-    def __init__(self,liquidity_constant=0.5, price_process_generator=PriceProcessGenerator()):
+    def __init__(self,liquidity_constant=0.9, price_process_generator=PriceProcessGenerator()):
         """
         initialize a simple simulator
         :param liquidity_constant: float parameter
