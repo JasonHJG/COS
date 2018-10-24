@@ -45,5 +45,5 @@ class Trade_book:
         :param price: price for each share
         :param trade_cost: trade cost defined by the stock
         """
-        _, last_price, last_postion, last_cash, _ = self.get_recent_information()
-        self.book[time_step] = [price, last_postion+action, last_cash - trade_cost(action) - action * price, action]
+        _, last_price, last_position, last_cash, _ = self.get_recent_information()
+        self.book[time_step] = [price, last_position+action, last_cash - trade_cost(action) - action * price, action]

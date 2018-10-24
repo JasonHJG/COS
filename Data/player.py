@@ -9,19 +9,20 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, stock, utility_function, strategy, action=[-200, -100, 0, 100, 200]):
+    def __init__(self, stock, utility_function, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200]):
         """
         initialize an instance of player in the stock market
         :param stock: stock the player is holding
         :param utility_function: the utility function of the player
         :param strategy: the RL strategy of the player
-        :param trade_book: a book to keep track of the player's position and cash
+        :param gamma: [0.8], float, speed of diminishing utility
         :param action: list of possible movement of position
         """
         self.stock = stock
         self.utility_function = utility_function
         self.strategy = strategy
         self.action = action
+        self.gamma = gamma
         time_step, price, _ = self.stock.get_history(1)
         self.trade_book = Trade_book(time_step[0], price[0], 0, 0, 0)
         self.utility = {}
@@ -33,10 +34,10 @@ class Player:
         """
         net_worth = self.trade_book.calculate_net_worth()
         time_steps = list(net_worth)
-        self.utility[time_steps[0]] = 0  # initialization
         net_worth_value = list(net_worth.values())
-        for i in range(1, len(time_steps)):
-            self.utility[i] = self.utility_function(net_worth_value[i] - net_worth_value[i - 1])
+        for i in range(len(time_steps)-1):
+            self.utility[i] = self.utility_function(net_worth_value[i+1] - net_worth_value[i])
+        return self.utility
 
     def observe(self, n_steps=1):
         """
@@ -62,33 +63,22 @@ class Player:
         """
         self.stock.move_forward()
 
-    def epsilon_greedy(self, epsilon=0.05):
+    def trade_greedy_one_step(self):
         """
-        trade according to epsilon greedy algorithm:
-        with probability epsilon to trade randomly,
-        with probability 1-epsilon not to trade (action = 0)
-        :param epsilon: probability to trade randomly
+        trade one step forward
+        :return:
         """
-        index, price, liquidity = self.observe(1)
-        index = index[0]
-        price = price[0]
-        liquidity = liquidity[0] # for this time being, liquidity is not used
-        ran = np.random.random()
-        if ran < epsilon: # trade randomly
-            rand_index = np.random.randint(len(self.action))
-            action = self.action[rand_index]
-        else:
-            action = self.strategy.decide(price) # look at the current state and take action to maximize the gain
-        self.record(index, action, price, self.stock.trade_cost)
+        step, price, liquid = self.observe(1)
+        action = self.strategy.epsilon_greedy(price, self.action)
+        self.record(step[0], action, price[0], lambda x: self.stock.trade_cost(x, 10, 0.01))
+        self.progress()
 
-    def update_strategy(self, look_back, length_of_state=1):
+    def update_strategy(self, look_back=50000, length_of_state=1):
         """
         update Q function in strategy based on past observations
         :param look_back: int, number of steps to look back
         :param length_of_state: [1], number of steps to take as one state
         """
-        index, price_list, liquidity_list = self.observe(look_back)
-        # todo implement strategy class
-        self.strategy.train(index, price_list, liquidity_list, self.position, self.utility_function,
-                            length_of_state, self.action)
-
+        utility_dict = self.calculate_utility()
+        trade_book = self.trade_book.book
+        self.strategy.upgrade(utility_dict, trade_book, self.gamma)

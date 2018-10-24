@@ -1,3 +1,4 @@
-from .COS import COS
+from .sla import SLA
+from .strategy import Strategy
 
-__all__ = ["COS"]
+__all__ = ['SLA', 'strategy']
