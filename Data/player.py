@@ -59,13 +59,13 @@ class Player:
         index, price, liquidity = self.observe(1)
         index = index[0]
         price = price[0]
-        liquidity = liquidity[0]
+        liquidity = liquidity[0] # for this time being, liquidity is not used
         ran = np.random.random()
         if ran < epsilon: # trade randomly
             rand_index = np.random.randint(len(self.action))
             action = self.action[rand_index]
         else:
-            action = self.strategy.decide()
+            action = self.strategy.decide(price) # look at the current state and take action to maximize the gain
         self.record(index, action, price, self.stock.trade_cost)
 
     def update_strategy(self, look_back, length_of_state=1):
