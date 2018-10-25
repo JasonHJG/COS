@@ -39,6 +39,8 @@ class SLA:
         state_action_values = np.zeros(len(possible_actions))
         for i in range(len(possible_actions)):
             state_action_values[i] = self.qval(state, possible_actions[i])
+        if min(state_action_values) == max(state_action_values):
+            return 0
         return possible_actions[np.argmax(state_action_values)]
 
     def fit(self, X, y):
@@ -49,3 +51,4 @@ class SLA:
         """
         sl = clone(self.regressor)
         self.supervised_learners.append(sl.fit(X, y))
+        print('accuracy is : ',sl.score(X,y))

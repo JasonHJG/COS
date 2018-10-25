@@ -46,7 +46,9 @@ class Strategy:
         y = []
         for date in utility_dates:
             price = trade_book[date][0]
+            position = trade_book[date][1]
             action = trade_book[date][3]
-            X.append([price, action])
-            y.append(utility_dict[date]+ gamma * self.learner.qval(price, action))
+            state = np.array([price, position])
+            X.append(np.r_[state, action]) # add position
+            y.append(utility_dict[date]+ gamma * self.learner.qval(state, action))
         self.learner.fit(X, y)

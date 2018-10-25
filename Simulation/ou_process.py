@@ -39,7 +39,7 @@ class Ornstein_Uhlenbeck:
         self.price_array = list(self.price_array)
         for i in range(len(self.x_array)):
             self.x_dict[i] = self.x_array[i]
-            self.price_dict[i] = self.price_array[i]
+            self.price_dict[i] = round(self.price_array[i],2)
 
     def get_price(self, n_steps):
         """
@@ -63,7 +63,7 @@ class Ornstein_Uhlenbeck:
         last_x_data = self.x_dict[time_steps[-1]]
         new_x_data = last_x_data + self.theta * (self.mu - last_x_data) * 1 + \
                       self.sigma * self.sqrt_dt * np.random.normal(0, 1)
-        new_price_data = np.exp(new_x_data) * self.p0
+        new_price_data = round(np.exp(new_x_data) * self.p0,2)
         self.x_dict[time_steps[-1]+1] = new_x_data
         self.price_dict[time_steps[-1]+1] = new_price_data
 

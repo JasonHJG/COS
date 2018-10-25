@@ -63,13 +63,17 @@ class Player:
         """
         self.stock.move_forward()
 
-    def trade_greedy_one_step(self):
+    def trade_greedy_one_step(self, epsilon=.05):
         """
         trade one step forward
         :return:
         """
         step, price, liquid = self.observe(1)
-        action = self.strategy.epsilon_greedy(price, self.action)
+        # get the players position
+        _, _, position, _, _ = self.trade_book.get_recent_information()
+        # add position
+        state = np.array([price, position])
+        action = self.strategy.epsilon_greedy(state, self.action, epsilon)
         self.record(step[0], action, price[0], lambda x: self.stock.trade_cost(x, 10, 0.01))
         self.progress()
 
