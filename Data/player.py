@@ -9,7 +9,8 @@ class Player:
     the player needs to record each step the state and action
     """
 
-    def __init__(self, stock, utility_function, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200]):
+    def __init__(self, stock, utility_function, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200],
+                 threshold=(0,1000)):
         """
         initialize an instance of player in the stock market
         :param stock: stock the player is holding
@@ -26,6 +27,7 @@ class Player:
         time_step, price, _ = self.stock.get_history(1)
         self.trade_book = Trade_book(time_step[0], price[0], 0, 0, 0)
         self.utility = {}
+        self.threshold = threshold
 
     def calculate_utility(self):
         """
@@ -74,6 +76,8 @@ class Player:
         # add position
         state = np.array([price, position])
         action = self.strategy.epsilon_greedy(state, self.action, epsilon)
+        if action + position > self.threshold[1] or action + position < self.threshold[0]:
+            action = 0
         self.record(step[0], action, price[0], lambda x: self.stock.trade_cost(x, 10, 0.01))
         self.progress()
 
