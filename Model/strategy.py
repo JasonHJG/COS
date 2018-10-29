@@ -32,7 +32,7 @@ class Strategy:
             action = self.learner.predict(observed_states, actions)
         return action
 
-    def upgrade(self, utility_dict, trade_book, gamma):
+    def upgrade(self, trade_book, gamma):
         """
         upgrade the learner with observations of one-step Sarsa target
         notice trade book at time t matches the utility at time t in our setting,
@@ -40,15 +40,20 @@ class Strategy:
         :param trade_book: dictionary of time_step(t):[price(t), position(t), cash(t), action(t)]
         :param gamma: float between (0,1) discounting factor for that person
         """
-        utility_dates = list(utility_dict)
-        utility_dates.sort()
+        time_steps = list(trade_book)
+        time_steps.sort()
         X = []
         y = []
-        for date in utility_dates:
-            price = trade_book[date][0]
-            position = trade_book[date][1]
-            action = trade_book[date][3]
-            state = np.array([price, position])
-            X.append(np.r_[state, action]) # add position
-            y.append(utility_dict[date]+ gamma * self.learner.qval(state, action))
+        for i in range(len(time_steps)-2):
+            price = trade_book[time_steps[i]]['state']['price']
+            position = trade_book[time_steps[i]]['state']['position']
+            state = np.array((price, position))
+            action = trade_book[time_steps[i]]['action']
+            X.append(np.r_[state, action])
+            next_price = trade_book[time_steps[i+1]]['state']['price']
+            next_position = trade_book[time_steps[i]]['state']['position']
+            next_state = np.array((next_price, next_position))
+            next_action = trade_book[time_steps[i+1]]['action']
+            next_utility = trade_book[time_steps[i+1]]['utility']
+            y.append(next_utility + gamma * self.learner.qval(next_state, next_action))
         self.learner.fit(X, y)

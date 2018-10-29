@@ -1,49 +1,51 @@
+from collections import defaultdict
+
+
 class Trade_book:
     """
     keep a record of all the transactions and the net worth
+    Trade_book has date:{'state':{'price':float, 'position':float}, 'action':int, 'utility':float}
     """
-    def __init__(self, time_step, price, position, cash, action):
+    def __init__(self):
         """
         initialize an instance of trade book
-        :param time_step: time step for the information
-        :param price: float, price of each share of a stock
-        :param position: int, position of the stock
-        :param cash: float, cash
-        :param action: int, change in position
         """
-        self.book = {}
-        self.book[time_step] = [price, position, cash, action]
+        self.book = defaultdict(dict)
 
-    def calculate_net_worth(self):
+    def get_recent_state(self):
         """
-        calculate the networth
-        :return: dictionary of networth
-        """
-        time_steps = list(self.book)
-        net_worth = {}
-        for time in time_steps:
-            price, position, cash, _ = self.book[time]
-            net_worth[time] = price * position + cash
-        return net_worth
-
-    def get_recent_information(self):
-        """
-        get the most recent information
-        :return: time_step, price, position, cash
+        get the most recent price
+        :return: time_step, price, position
         """
         time_steps = list(self.book)
         time_steps.sort()
         recent_time_step = time_steps[-1]
-        price, position, cash, action = self.book[recent_time_step]
-        return recent_time_step, price, position, cash, action
+        price = self.book[recent_time_step]['state']['price']
+        position = self.book[recent_time_step]['state']['position']
+        return recent_time_step, price, position
 
-    def add(self, time_step, action, price, trade_cost):
+    def add_state(self, time_step, price, position):
         """
-        record the trade to the trade book, adjust cash according to trading cost
+        record the state to the trade book
         :param time_step: index for time step
-        :param action: share traded
-        :param price: price for each share
-        :param trade_cost: trade cost defined by the stock
+        :param price: float price for each share
+        :param position: int position for the share
         """
-        _, last_price, last_position, last_cash, _ = self.get_recent_information()
-        self.book[time_step] = [price, last_position+action, last_cash - trade_cost(action) - action * price, action]
+        self.book[time_step]={'state':{'price':price, 'position':position}}
+
+    def add_action(self, time_step, action):
+        """
+        record action to the trade book
+        :param time_step: index for time step
+        :param action: int, change in the position
+        """
+        self.book[time_step]['action'] = action
+
+    def add_utility(self, time_step, utility):
+        """
+        record the utility to the trade book
+        :param time_step: index for time step
+        :param utility: float utility
+        """
+        self.book[time_step]['utility'] = utility
+

@@ -17,7 +17,7 @@ class Generic_functions:
         return dV - 0.5 * k * dV * dV
 
     @staticmethod
-    def trading_cost(share, mul, ts):
+    def trading_cost(share, mul=10, ts=0.1):
         """
         calculate trading cost based on cost(share) = mul * ts *(abs(share)+0.01 * share^2)
         :param share: int, number of share

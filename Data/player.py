@@ -10,7 +10,7 @@ class Player:
     """
 
     def __init__(self, stock, utility_function, strategy, gamma = 0.8, action=[-200, -100, 0, 100, 200],
-                 threshold=(0,1000)):
+                 threshold=(-1000,1000)):
         """
         initialize an instance of player in the stock market
         :param stock: stock the player is holding
@@ -25,21 +25,18 @@ class Player:
         self.action = action
         self.gamma = gamma
         time_step, price, _ = self.stock.get_history(1)
-        self.trade_book = Trade_book(time_step[0], price[0], 0, 0, 0)
+        self.trade_book = Trade_book()
+        self.trade_book.add_state(time_step[0], price[0], 0) #assume no initial position
         self.utility = {}
         self.threshold = threshold
 
-    def calculate_utility(self):
+    def get_utility(self, time_step):
         """
-        calculate the utility at time T, which is determined by the change in wealth from T-1 to T
+        get the utility at time T, which is determined by the change in wealth from T-1 to T
+        :param time_step: index for time
         :return: float, utility
         """
-        net_worth = self.trade_book.calculate_net_worth()
-        time_steps = list(net_worth)
-        net_worth_value = list(net_worth.values())
-        for i in range(len(time_steps)-1):
-            self.utility[i] = self.utility_function(net_worth_value[i+1] - net_worth_value[i])
-        return self.utility
+        return self.trade_book.book[time_step]['utility']
 
     def observe(self, n_steps=1):
         """
@@ -48,16 +45,6 @@ class Player:
         :return: index list, price list, liquidity list
         """
         return self.stock.get_history(n_steps)
-
-    def record(self, time_step, action, price, trade_cost):
-        """
-        record the trade to the trade book
-        :param time_step: index for time step
-        :param action: share traded
-        :param price: price for each share
-        :param trade_cost: trade cost defined by the stock
-        """
-        self.trade_book.add(time_step, action, price, trade_cost)
 
     def progress(self):
         """
@@ -68,18 +55,28 @@ class Player:
     def trade_greedy_one_step(self, epsilon=.05):
         """
         trade one step forward
-        :return:
         """
-        step, price, liquid = self.observe(1)
-        # get the players position
-        _, _, position, _, _ = self.trade_book.get_recent_information()
-        # add position
+        # get the player's state at t
+        time_step, price, position = self.trade_book.get_recent_state()
         state = np.array([price, position])
-        action = self.strategy.epsilon_greedy(state, self.action, epsilon)
-        if action + position > self.threshold[1] or action + position < self.threshold[0]:
-            action = 0
-        self.record(step[0], action, price[0], lambda x: self.stock.trade_cost(x, 10, 0.01))
+        # need to find the possible actions first
+        possible_actions = []
+        for action in self.action:
+            if self.threshold[0] <= action + position <= self.threshold[1]:
+                possible_actions.append(action)
+        action = self.strategy.epsilon_greedy(state, possible_actions, epsilon)
+        self.trade_book.add_action(time_step, action)
         self.progress()
+        # update price and position at t+1
+        next_time_step, next_price, _ = self.stock.get_history(1)
+        next_time_step = next_time_step[0]
+        next_price = next_price[0]
+        next_position = position + action
+        self.trade_book.add_state(next_time_step, next_price, next_position)
+        # add player's utility at t
+        dv = next_position * (next_price - price) - self.stock.trade_cost(action)
+        utility = self.utility_function(dv)
+        self.trade_book.add_utility(time_step, utility)
 
     def update_strategy(self, look_back=50000, length_of_state=1):
         """
@@ -87,6 +84,5 @@ class Player:
         :param look_back: int, number of steps to look back
         :param length_of_state: [1], number of steps to take as one state
         """
-        utility_dict = self.calculate_utility()
         trade_book = self.trade_book.book
-        self.strategy.upgrade(utility_dict, trade_book, self.gamma)
+        self.strategy.upgrade(trade_book, self.gamma)

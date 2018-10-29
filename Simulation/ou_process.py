@@ -7,7 +7,7 @@ class Ornstein_Uhlenbeck:
     define the OU process
     """
 
-    def __init__(self, theta = np.log(2) / 5, mu = 0, time = 1000, sigma = .15, p0 = 150):
+    def __init__(self, theta = np.log(2) / 5, mu = 0, time = 1000, sigma = .15, p0 = 50):
         """
         simulate OU process according to:
         X_n+1 = X_n + theta(mu - X_n)dt + sigma sqrt(dt) N~(0,1)
@@ -39,7 +39,11 @@ class Ornstein_Uhlenbeck:
         self.price_array = list(self.price_array)
         for i in range(len(self.x_array)):
             self.x_dict[i] = self.x_array[i]
-            self.price_dict[i] = round(self.price_array[i],2)
+            temp = round(self.price_array[i], 1)
+            if temp <= 100:
+                self.price_dict[i] = round(self.price_array[i],1)
+            else:
+                self.price_dict[i] = round(100.0,1)
 
     def get_price(self, n_steps):
         """
@@ -63,7 +67,11 @@ class Ornstein_Uhlenbeck:
         last_x_data = self.x_dict[time_steps[-1]]
         new_x_data = last_x_data + self.theta * (self.mu - last_x_data) * 1 + \
                       self.sigma * self.sqrt_dt * np.random.normal(0, 1)
-        new_price_data = round(np.exp(new_x_data) * self.p0,2)
+        new_price_data = round(np.exp(new_x_data) * self.p0,1)
+        if new_price_data <= 100:
+            new_price_data = new_price_data
+        else:
+            new_price_data = 100
         self.x_dict[time_steps[-1]+1] = new_x_data
         self.price_dict[time_steps[-1]+1] = new_price_data
 
