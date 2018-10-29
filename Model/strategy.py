@@ -44,6 +44,7 @@ class Strategy:
         time_steps.sort()
         X = []
         y = []
+        print(len(time_steps))
         for i in range(len(time_steps)-2):
             price = trade_book[time_steps[i]]['state']['price']
             position = trade_book[time_steps[i]]['state']['position']
@@ -57,3 +58,4 @@ class Strategy:
             next_utility = trade_book[time_steps[i+1]]['utility']
             y.append(next_utility + gamma * self.learner.qval(next_state, next_action))
         self.learner.fit(X, y)
+

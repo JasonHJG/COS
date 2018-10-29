@@ -86,3 +86,12 @@ class Player:
         """
         trade_book = self.trade_book.book
         self.strategy.upgrade(trade_book, self.gamma)
+        self._clean_trade_book()
+
+    def _clean_trade_book(self):
+        """
+        clean trade book so that it only contains the most recent state
+        """
+        time_step, price, position = self.trade_book.get_recent_state()
+        self.trade_book.clear()
+        self.trade_book.add_state(time_step, price, position)

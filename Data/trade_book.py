@@ -49,3 +49,8 @@ class Trade_book:
         """
         self.book[time_step]['utility'] = utility
 
+    def clear(self):
+        """
+        clear the trade book, set it to None
+        """
+        self.book.clear()
