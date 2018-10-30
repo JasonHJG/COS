@@ -24,19 +24,11 @@ class Player:
         self.strategy = strategy
         self.action = action
         self.gamma = gamma
-        time_step, price, _ = self.stock.get_history(1)
+        time_step, price, _ = self.stock.get_last_history()
         self.trade_book = Trade_book()
-        self.trade_book.add_state(time_step[0], price[0], 0) #assume no initial position
+        self.trade_book.add_state(time_step, price, 0) #assume no initial position
         self.utility = {}
         self.threshold = threshold
-
-    def get_utility(self, time_step):
-        """
-        get the utility at time T, which is determined by the change in wealth from T-1 to T
-        :param time_step: index for time
-        :return: float, utility
-        """
-        return self.trade_book.book[time_step]['utility']
 
     def observe(self, n_steps=1):
         """
@@ -68,9 +60,7 @@ class Player:
         self.trade_book.add_action(time_step, action)
         self.progress()
         # update price and position at t+1
-        next_time_step, next_price, _ = self.stock.get_history(1)
-        next_time_step = next_time_step[0]
-        next_price = next_price[0]
+        next_time_step, next_price, _ = self.stock.get_last_history()
         next_position = position + action
         self.trade_book.add_state(next_time_step, next_price, next_position)
         # add player's utility at t

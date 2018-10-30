@@ -16,6 +16,16 @@ class Dummy_liquidity_process:
         liquidity_process = np.ones(n_step) * 0.5
         for i in range(len(liquidity_process)):
             self.liquidity_dict[i] = liquidity_process[i]
+        self.last_time_step = len(liquidity_process) - 1
+
+    def clear(self):
+        """
+        clear all the liquidity information, only keep the last
+        """
+        last_time = self.get_last_time_step()
+        last_liquid = self.liquidity_dict[last_time]
+        self.liquidity_dict.clear()
+        self.liquidity_dict[last_time] = last_liquid
 
     def move_forward(self):
         """
@@ -23,6 +33,7 @@ class Dummy_liquidity_process:
         """
         last_time_step = list(self.liquidity_dict)[-1]
         self.liquidity_dict[last_time_step+1] = 0.5
+        self.last_time_step += 1
 
     def get_process(self, n_steps):
         """
@@ -37,3 +48,10 @@ class Dummy_liquidity_process:
         for i in recent_process_index:
             recent_process.append(self.liquidity_dict[i])
         return recent_process, recent_process_index
+
+    def get_last_time_step(self):
+        """
+        get the last time step
+        :return: int, most recent time step
+        """
+        return self.last_time_step

@@ -11,15 +11,14 @@ class Trade_book:
         initialize an instance of trade book
         """
         self.book = defaultdict(dict)
+        self.recent_time = None
 
     def get_recent_state(self):
         """
         get the most recent price
         :return: time_step, price, position
         """
-        time_steps = list(self.book)
-        time_steps.sort()
-        recent_time_step = time_steps[-1]
+        recent_time_step = self.recent_time
         price = self.book[recent_time_step]['state']['price']
         position = self.book[recent_time_step]['state']['position']
         return recent_time_step, price, position
@@ -32,6 +31,7 @@ class Trade_book:
         :param position: int position for the share
         """
         self.book[time_step]={'state':{'price':price, 'position':position}}
+        self.recent_time = time_step
 
     def add_action(self, time_step, action):
         """

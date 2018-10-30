@@ -55,7 +55,7 @@ class Strategy:
             next_position = trade_book[time_steps[i]]['state']['position']
             next_state = np.array((next_price, next_position))
             next_action = trade_book[time_steps[i+1]]['action']
-            next_utility = trade_book[time_steps[i+1]]['utility']
+            next_utility = trade_book[time_steps[i]]['utility']
             y.append(next_utility + gamma * self.learner.qval(next_state, next_action))
         self.learner.fit(X, y)
 

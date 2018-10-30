@@ -19,6 +19,18 @@ class Stock:
         self.price_process = price_process
         self.liquidity_process = liquidity_process
         self.trade_cost = trade_cost
+        self.last_time = None
+        if self.price_process.get_last_time_step() == self.liquidity_process.get_last_time_step():
+            self.last_time = self.price_process.get_last_time_step()
+        else:
+            print('time not synchronized')
+
+    def clear(self):
+        """
+        remove price and liquidity information from the stock, only retain the last state
+        """
+        self.price_process.clear()
+        self.liquidity_process.clear()
 
     def move_forward(self):
         """
@@ -26,6 +38,7 @@ class Stock:
         """
         self.price_process.move_forward()
         self.liquidity_process.move_forward()
+        self.last_time += 1
 
     def get_history(self, n_steps):
         """
@@ -39,3 +52,13 @@ class Stock:
             print('error in dates')
             return
         return index1, recent_price, recent_liquidity
+
+    def get_last_history(self):
+        """
+        get the last history of the stock
+        :return: last time step, last price, last liquidity
+        """
+        time = self.last_time
+        price = self.price_process.price_dict[self.last_time]
+        liquidity = self.liquidity_process.liquidity_dict[self.last_time]
+        return time, price, liquidity

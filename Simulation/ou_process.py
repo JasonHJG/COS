@@ -44,6 +44,19 @@ class Ornstein_Uhlenbeck:
                 self.price_dict[i] = round(self.price_array[i],1)
             else:
                 self.price_dict[i] = round(100.0,1)
+        self.last_time_step = len(self.x_array) - 1
+
+    def clear(self):
+        """
+        remove all other price, only keep the last one
+        """
+        last_time = self.get_last_time_step()
+        last_price = self.price_dict[last_time]
+        last_x = self.x_dict[last_time]
+        self.price_dict.clear()
+        self.x_dict.clear()
+        self.price_dict[last_time] = last_price
+        self.x_dict[last_time] = last_x
 
     def get_price(self, n_steps):
         """
@@ -74,6 +87,8 @@ class Ornstein_Uhlenbeck:
             new_price_data = 100
         self.x_dict[time_steps[-1]+1] = new_x_data
         self.price_dict[time_steps[-1]+1] = new_price_data
+        # update the last step
+        self.last_time_step += 1
 
     def plot_x(self):
         """
@@ -86,3 +101,10 @@ class Ornstein_Uhlenbeck:
         plot the process
         """
         plt.plot(np.linspace(0, self.time, self.n_step), list(self.price_dict.values()))
+
+    def get_last_time_step(self):
+        """
+        get the last time step
+        :return: int, most recent time step
+        """
+        return self.last_time_step
